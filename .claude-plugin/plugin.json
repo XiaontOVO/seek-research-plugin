@@ -1,0 +1,10 @@
+{
+  "name": "seek",
+  "version": "1.0.0",
+  "description": "Foolproof research pipeline — from question to paper, standard by standard, step by step. Merges GuideTree's hierarchical decomposition and validation gates with AutoResearch's domain expertise.",
+  "author": "Seek Research Tools",
+  "license": "MIT",
+  "keywords": ["research", "pipeline", "paper", "experiment", "literature-review", "scientific-method"],
+  "category": "research",
+  "strict": true
+}

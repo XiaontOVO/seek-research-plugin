@@ -1,0 +1,51 @@
+# Literature Survey Domain Template
+
+domain_id: literature-survey
+description: >
+  Systematic literature review and analysis. Discover, triage, analyze, and
+  synthesize existing work. Produces a survey paper or literature review chapter.
+
+scope:
+  includes:
+    - Systematic literature reviews
+    - Survey papers
+    - Meta-analyses of published results
+    - Gap analysis and research agenda papers
+  excludes:
+    - Original experimental research (use computational-experiment)
+    - Patent prior art search (use patent-search domain)
+
+core_principles:
+  - Zotero-first: all papers in Zotero before selection
+  - Triage before download: read abstracts before fetching PDFs
+  - Comparison matrix is the central artifact
+  - Research gap drives the narrative
+
+phase_archetypes:
+  - id: context
+    required: true
+    purpose: Define survey scope, inclusion/exclusion criteria
+  - id: literature
+    required: true
+    purpose: Systematic search, triage, deep-read, comparison matrix
+    typical_stages:
+      - id: search
+        goal: Multi-source discovery with fallback chain
+      - id: triage
+        goal: Filter candidates, select deep-read set
+      - id: deep_read
+        goal: Structured analysis of each selected paper
+      - id: synthesize
+        goal: Build comparison matrix, identify gaps, taxonomize
+  - id: ideas
+    required: false
+    purpose: If the survey proposes a research agenda
+  - id: communication
+    required: true
+    purpose: Write survey paper
+  - id: audit
+    required: true
+    purpose: Citation verification, coverage check
+  - id: crystallize
+    required: false
+    purpose: Extract key insights as reusable knowledge

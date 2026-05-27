@@ -1,0 +1,77 @@
+﻿# Gate Configurations — adapted from AutoResearch audit-gate/gate-configs.yml
+# Each gate defines: name, artifacts to review, domain dimensions, threshold
+
+gates:
+  gate_1_literature:
+    name: "Literature Review Gate"
+    phase_dir: "D:/Research/plugin/seek/test/test2/docs/seek/phase-1-literature"
+    threshold: 6.5
+    artifacts:
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-1-literature/search-log.md"
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-1-literature/comparison-matrix.md"
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-1-literature/gap-analysis.md"
+    domain_dimensions:
+      - "Source diversity (Zotero + arXiv + paperplain coverage)"
+      - "Coverage breadth (>= 20 candidates, >= 5 deep-read)"
+      - "Recency (recent papers included, not only classics)"
+      - "Gap specificity (research gap is specific to RQ, not generic)"
+
+  gate_2_ideas:
+    name: "Idea Design Gate"
+    phase_dir: "D:/Research/plugin/seek/test/test2/docs/seek/phase-2-ideas"
+    threshold: 6.5
+    artifacts:
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-2-ideas/design-brief.md"
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-2-ideas/claims-dag.yml"
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-2-ideas/claims-matrix.md"
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-2-ideas/novelty-report.md"
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-2-ideas/risk-register.md"
+    domain_dimensions:
+      - "Falsifiability (every claim has falsification condition)"
+      - "Claims DAG validity (no cycles, correct dependency ordering)"
+      - "Novelty verification (cross-model Agent assessment)"
+      - "Risk coverage (>= 3 risks with early-warning + mitigation)"
+
+  gate_3_investigation:
+    name: "Investigation Gate"
+    phase_dir: "D:/Research/plugin/seek/test/test2/docs/seek/phase-3-investigation"
+    threshold: 6.5
+    artifacts:
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-3-investigation/stage-3.4-finalize/claims-matrix-v2.md"
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-3-investigation/stage-3.4-finalize/investigation-report.md"
+    domain_dimensions:
+      - "Experiment validity (every experiment tests a specific claim)"
+      - "Statistical rigor (effect size + significance, >= 3 seeds)"
+      - "6-file contract compliance (all runs have complete output)"
+      - "Evidence traceability (every claim traces to raw data)"
+      - "Ablation completeness (component contributions verified)"
+
+  gate_4_communication:
+    name: "Communication Gate"
+    phase_dir: "D:/Research/plugin/seek/test/test2/docs/seek/phase-4-communication"
+    threshold: 6.0
+    artifacts:
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-4-communication/paper-plan.md"
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-4-communication/draft/"
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-4-communication/review-log.md"
+    domain_dimensions:
+      - "Claims-evidence alignment (every paper claim has matrix evidence)"
+      - "Structure quality (abstract self-contained, intro answers What/Why/So What)"
+      - "Writing quality (no hype words, quantitative results have context)"
+      - "Review completeness (>= 1 round, score >= 6.0)"
+
+  gate_5_audit:
+    name: "Final Audit Gate"
+    phase_dir: "D:/Research/plugin/seek/test/test2/docs/seek/phase-5-audit"
+    threshold: 7.0
+    artifacts:
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-5-audit/gate-audit.md"
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-5-audit/claims-audit.md"
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-5-audit/citation-audit.md"
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-5-audit/reproducibility-audit.md"
+      - "D:/Research/plugin/seek/test/test2/docs/seek/phase-5-audit/final-verdict.md"
+    domain_dimensions:
+      - "Audit completeness (all 4 audits executed)"
+      - "Citation verifiability (3-layer check passed)"
+      - "Reproducibility (independent Agent reproduced core result)"
+      - "Gold score quality (at least 1 GOLD claim or honest zero-GOLD warning)"

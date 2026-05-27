@@ -1,0 +1,23 @@
+# guidetree/project.yaml — control plane project state
+project_id: ""
+project_name: ""
+domain: ""
+type: ""
+status: initialized
+research_question: ""
+falsification_condition: ""
+
+phases:
+  P0_context: { status: not_started, valid: false }
+  P1_literature: { status: not_started, valid: false }
+  P2_discover: { status: not_started, valid: false }
+  P3_design: { status: not_started, valid: false }
+  P4_investigate: { status: not_started, valid: false }
+  P5_communicate: { status: not_started, valid: false }
+  P6_audit: { status: not_started, valid: false }
+  P7_crystallize: { status: not_started, valid: false }
+
+current: { phase_id: null, stage_id: null, step_id: null }
+phase_lock: true
+created_at: ""
+updated_at: ""

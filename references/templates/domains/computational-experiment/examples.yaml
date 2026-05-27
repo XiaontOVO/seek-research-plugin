@@ -1,0 +1,30 @@
+# Computational Experiment — Good/Bad Examples
+
+bad_plan:
+  title: "Test if my new optimizer works"
+  research_question: "Is my optimizer good?"
+  why_bad:
+    - "No falsification condition — what result would disprove it?"
+    - "No baseline specified — compared to what?"
+    - "No quantitative prediction — what improvement is meaningful?"
+    - "Claims are vague — 'works' and 'good' are not measurable"
+
+good_plan:
+  title: "Does AdaNorm converge faster than AdamW on transformer LMs under 100M params?"
+  research_question: "AdaNorm reduces training steps to reach 90% of final perplexity by >= 15% compared to AdamW"
+  falsification: "If AdaNorm's convergence speedup is < 5% or p > 0.05, the hypothesis is refuted"
+  baseline: "AdamW with default β1=0.9, β2=0.999, lr=3e-4"
+  claims:
+    - C1: "AdaNorm reaches 90% final perplexity in <= 85% of AdamW's steps (>= 15% speedup)"
+    - C2: "AdaNorm's wall-clock overhead is < 5% of AdamW's per-step time"
+    - C3: "The speedup is consistent across model sizes (10M, 50M, 100M params)"
+
+investigation_approach:
+  stage_sequence:
+    - setup: "Create experiment harness with config-driven runner"
+    - baseline: "Implement AdamW baseline + verify correctness on tiny model"
+    - claim_loop:
+        C1: "Implement AdaNorm → sanity on 1M model → run 3 sizes × 5 seeds → compare convergence curves → decide"
+        C2: "Profile per-step time for both optimizers → compute overhead ratio → decide"
+        C3: "Analyze C1 results across sizes → check interaction effect → decide"
+    - finalize: "Ablation on β parameters, 5-seed final runs, statistical tests"

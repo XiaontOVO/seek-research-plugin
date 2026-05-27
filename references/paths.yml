@@ -1,0 +1,137 @@
+# Seek output structure — control plane + product plane
+# guidetree/ = agent governance (plans, state, validation, registry)
+# External dirs = real project deliverables
+
+output_root: "."
+
+# ── Control Plane: guidetree/ ──
+guidetree:
+  dir: "guidetree"
+  project: "guidetree/project.yaml"
+  context:
+    dir: "guidetree/context"
+    project_context: "guidetree/context/project_context.json"
+    assumptions: "guidetree/context/assumptions.md"
+    constraints: "guidetree/context/constraints.md"
+    non_goals: "guidetree/context/non_goals.md"
+    decisions: "guidetree/context/decisions.md"
+  plan:
+    dir: "guidetree/plan"
+    phase_skeleton: "guidetree/plan/phase_skeleton.json"
+    stage_dags: "guidetree/plan/stage_dags/"
+    steps: "guidetree/plan/steps/"
+    dependencies: "guidetree/plan/dependencies.json"
+    summary: "guidetree/plan/plan_summary.md"
+  state:
+    dir: "guidetree/state"
+    current: "guidetree/state/current_state.json"
+    history: "guidetree/state/execution_history.jsonl"
+    blockers: "guidetree/state/blockers.json"
+  validation:
+    dir: "guidetree/validation"
+    phases: "guidetree/validation/phases/"
+    stages: "guidetree/validation/stages/"
+    steps: "guidetree/validation/steps/"
+    project: "guidetree/validation/project.validation.json"
+  registry:
+    dir: "guidetree/registry"
+    artifacts: "guidetree/registry/artifact_registry.json"
+    deliverables: "guidetree/registry/deliverable_registry.json"
+  runs:
+    dir: "guidetree/runs"
+    skill_calls: "guidetree/runs/skill_calls/"
+    tool_outputs: "guidetree/runs/tool_outputs/"
+    transcripts: "guidetree/runs/transcripts/"
+  logs:
+    dir: "guidetree/logs"
+    orchestrator: "guidetree/logs/orchestrator.log"
+    errors: "guidetree/logs/errors.log"
+  checkpoints:
+    dir: "guidetree/checkpoints"
+  archive:
+    dir: "guidetree/archive"
+
+# ── Product Plane: external deliverables ──
+products:
+  hardware_profile: "hardware-profile.json"
+  readme: "README.md"
+
+  literature:
+    dir: "literature"
+    search_log: "literature/search-log.md"
+    paper_notes: "literature/paper-notes/"
+    comparison_matrix: "literature/comparison-matrix.md"
+    gap_analysis: "literature/gap-analysis.md"
+
+  ideas:
+    dir: "ideas"
+    landscape_map: "ideas/landscape-map.md"
+    idea_candidates: "ideas/idea-candidates.md"
+    pilot_results: "ideas/pilot-results.md"
+    selected_idea: "ideas/selected-idea.md"
+    design_brief: "ideas/design-brief.md"
+    claims_dag: "ideas/claims-dag.yml"
+    claims_matrix: "ideas/claims-matrix.md"
+    novelty_report: "ideas/novelty-report.md"
+    roadmap: "ideas/roadmap.md"
+
+  src: "src/"
+  configs: "configs/"
+
+  experiments:
+    dir: "experiments"
+    configs: "experiments/configs/"
+    runs: "experiments/runs/"
+    processed: "experiments/processed/"
+    reproducibility: "experiments/reproducibility/"
+
+  analysis:
+    dir: "analysis"
+    hypothesis_cards: "analysis/hypothesis-cards/"
+    analysis_notes: "analysis/analysis-notes/"
+    investigation_report: "analysis/investigation-report.md"
+
+  paper:
+    dir: "paper"
+    plan: "paper/paper-plan.md"
+    figures: "paper/figures/"
+    draft: "paper/draft.md"
+    review_log: "paper/review-log.md"
+
+  audit:
+    dir: "audit"
+    gate: "audit/gate-audit.md"
+    claims: "audit/claims-audit.md"
+    citation: "audit/citation-audit.md"
+    reproducibility: "audit/reproducibility-audit.md"
+    final_verdict: "audit/final-verdict.md"
+
+  gold:
+    dir: "gold"
+    manifest: "gold/GOLD_MANIFEST.md"
+    index: "gold/GOLD_INDEX.md"
+    code: "gold/code/"
+    data: "gold/data/"
+    meta: "gold/meta/"
+
+  deliverables:
+    dir: "deliverables"
+    final_report: "deliverables/final_report.md"
+    reproducibility_package: "deliverables/reproducibility_package/"
+
+run_layout:
+  raw_record: "raw_record.json"
+  attempts: "attempts.csv"
+  metrics: "metrics.csv"
+  config: "config.yaml"
+  hardware_info: "hardware_info.json"
+  summary: "summary.md"
+
+# ── Boundary Rules ──
+# 1. guidetree/ = control plane (agent governance only)
+# 2. All real products go to external dirs (literature/, ideas/, src/, experiments/, paper/, audit/, gold/)
+# 3. Every external product MUST be registered in guidetree/registry/artifact_registry.json
+# 4. guidetree/plan/ describes what to do, not the deliverables
+# 5. guidetree/state/ tracks execution, not product content
+# 6. guidetree/validation/ stores validation reports, never modifies products
+# 7. guidetree/runs/ records agent/skill/tool invocations, not experiment data

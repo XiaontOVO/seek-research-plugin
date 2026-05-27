@@ -1,0 +1,8 @@
+{
+  "hooks": {
+    "SessionStart": {
+      "command": "powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PLUGIN_ROOT/hooks/session-start.ps1\"",
+      "trigger": ["startup", "clear", "compact"]
+    }
+  }
+}

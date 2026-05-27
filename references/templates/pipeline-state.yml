@@ -1,0 +1,82 @@
+# Seek Pipeline State
+# Single source of truth for research project progress.
+# Updated by phase skills after each phase completion.
+# Read by orchestrate skill to determine next action.
+
+project:
+  title: ""
+  research_question: ""
+  project_type: ""  # computational_experiment | literature_survey
+  non_goals: []
+
+phases:
+  context:
+    status: not_started
+    valid: false
+    repair_count: 0
+    artifacts: {}
+
+  literature:
+    status: not_started
+    valid: false
+    repair_count: 0
+    artifacts: {}
+
+  discover_ideas:
+    status: not_started
+    valid: false
+    repair_count: 0
+    artifacts: {}
+
+  design_ideas:
+    status: not_started
+    valid: false
+    repair_count: 0
+    artifacts: {}
+
+  investigation:
+    status: not_started
+    valid: false
+    repair_count: 0
+    iterations_count: 0
+    artifacts: {}
+
+  communication:
+    status: not_started
+    valid: false
+    repair_count: 0
+    artifacts: {}
+
+  audit:
+    status: not_started
+    valid: false
+    repair_count: 0
+    artifacts: {}
+
+  crystallize:
+    status: not_started
+    valid: false
+    repair_count: 0
+    artifacts: {}
+
+current_phase: context
+phase_lock: true
+auto_mode: false
+
+# Execution policy — controls behavior flags across the pipeline
+execution_policy:
+  require_dependencies_done: true     # Block execution if prior phase artifacts missing
+  require_inputs_available: true      # Block if required inputs unavailable
+  require_evidence: true              # Require evidence for all acceptance checks
+  stop_on_blocker: true               # Stop pipeline on blocking issues
+  allow_parallel: true                # Allow parallel independent operations
+  max_repair_attempts: 3              # Max repair attempts per phase
+  novelty_threshold: 0.7              # Minimum novelty score for core claims
+  min_seeds: 3                        # Minimum experiment seeds
+  recommended_seeds: 5                # Recommended experiment seeds
+  max_review_rounds: 4                # Max paper review rounds
+  review_pass_threshold: 6.0          # Minimum review score to pass
+
+# Status enum: not_started | in_progress | done | blocked | failed | skipped
+# Valid: true when phase self-validation passes
+# phase_lock: true means only current_phase skills may execute

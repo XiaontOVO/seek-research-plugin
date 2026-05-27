@@ -1,0 +1,72 @@
+# Computational Experiment Domain Template
+# Referenced by seek skills to produce domain-appropriate structures.
+
+domain_id: computational-experiment
+description: >
+  Hypothesis-driven computational research: implement method, run experiments,
+  analyze results, iterate. Covers ML/AI, systems, cryptography, simulation.
+
+scope:
+  includes:
+    - Machine learning model training and evaluation
+    - System performance benchmarking
+    - Cryptographic protocol implementation and measurement
+    - Simulation-based scientific computing
+    - Algorithm comparison and ablation
+  excludes:
+    - Pure theoretical proofs (use theoretical-analysis domain)
+    - Human-subject studies (use empirical-user-study domain)
+    - Literature-only surveys (use literature-survey domain)
+
+core_principles:
+  - Every experiment tests a specific hypothesis
+  - Code and experiment form ONE feedback loop, not sequential phases
+  - Baseline comparison is mandatory
+  - Statistical rigor: effect size + significance, not just p-values
+  - All results traceable to raw data files
+
+phase_archetypes:
+  - id: context
+    required: true
+    purpose: Define research question, hardware profile, constraints
+  - id: literature
+    required: true
+    purpose: Position against prior work, identify gap
+  - id: ideas
+    required: true
+    purpose: Design method, build Claims Matrix, verify novelty
+  - id: investigation
+    required: true
+    purpose: Claims-driven implement-test-analyze loop
+    typical_stages:
+      - id: setup
+        goal: Establish experimental infrastructure
+      - id: baseline
+        goal: Implement and validate baseline methods
+      - id: claim_loop
+        goal: For each claim, run full investigation cycle
+      - id: finalize
+        goal: Ablation, multi-seed validation, final matrix
+  - id: communication
+    required: true
+    purpose: Claims Matrix → paper
+  - id: audit
+    required: true
+    purpose: Verify claims, citations, reproducibility
+  - id: crystallize
+    required: false
+    purpose: Extract gold contributions post-pipeline
+
+anti_patterns:
+  - bad: "Running experiments without a hypothesis"
+    why_bad: "Produces uninterpretable results; wastes compute"
+    fix: "Define a quantitative prediction before any experiment"
+  - bad: "Writing all code before running any experiment"
+    why_bad: "Delays feedback; bugs compound; wrong direction goes undetected"
+    fix: "Implement-test-analyze per claim, not per phase"
+  - bad: "Reporting best seed without mean ± std"
+    why_bad: "Cherry-picking; inflated claims; not reproducible"
+    fix: "Report mean ± std across >= 5 seeds"
+  - bad: "No baseline comparison"
+    why_bad: "Cannot establish whether the method is actually better"
+    fix: "Always include at least one baseline; report delta"
