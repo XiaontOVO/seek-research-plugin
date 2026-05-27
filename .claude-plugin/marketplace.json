@@ -1,25 +1,21 @@
 {
-  "name": "Seek — Foolproof Research Pipeline",
-  "description": "Complete research pipeline from question to paper submission. 6 phases, each with explicit standards and checklists. Even a novice can do rigorous research. Merges GuideTree's hierarchical decomposition with validation gates and AutoResearch's domain expertise.",
-  "version": "1.0.0",
-  "author": "Seek Research Tools",
-  "license": "MIT",
-  "category": "research",
-  "tags": ["research", "pipeline", "paper", "experiment", "literature", "academic"],
-  "entrypoint": "/seeker",
-  "skills": [
-    "seek:orchestrate",
-    "seek:define_context",
-    "seek:review_literature",
-    "seek:discover_ideas",
-    "seek:design_ideas",
-    "seek:investigate",
-    "seek:communicate",
-    "seek:audit",
-    "seek:crystallize"
-  ],
-  "templates": [
-    "code-review-checklist.md",
-    "claims-audit-checklist.md"
-  ]
+    "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+    "name": "seek",
+    "description": "Foolproof research pipeline plugin — 9 skills, control/data plane architecture, phase→stage→step decomposition. Merges GuideTree hierarchical decomposition with AutoResearch domain expertise",
+    "owner": {
+        "name": "Seek"
+    },
+    "metadata": {
+        "version": "1.0.0"
+    },
+    "plugins": [
+        {
+            "name": "seek",
+            "description": "Foolproof research pipeline plugin — 9 skills, control/data plane architecture, phase→stage→step decomposition. Merges GuideTree hierarchical decomposition with AutoResearch domain expertise",
+            "category": "research",
+            "version": "1.0.0",
+            "strict": true,
+            "source": "./"
+        }
+    ]
 }
