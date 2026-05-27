@@ -6,9 +6,9 @@ description: > Final safety net before submission. 3-Agent parallel gate audit +
 
 # audit
 
-**Core principle:** No artifact passes without independent verification. Three fresh eyes, zero shared context. Every number traced to raw data. Every citation traced to reality.
+**Core principle:** No artifact passes without independent verification. Three fresh eyes, zero shared context. Every number traced to raw data. Every citation traced to reality. **Gates are BLOCKING — FAIL means the pipeline cannot proceed to crystallize.**
 
-Phase 5 of the Seek pipeline. The final safety net: verifies claims against raw experiment data, citations against real publications, and reproducibility by an independent Agent.
+Phase 6 of the Seek pipeline. The final safety net with strict gate enforcement. FAIL blocks pipeline completion. Auto-mode: repair → re-audit (max 3 rounds) → redo phase → exit auto-mode.
 
 ## When To Use
 
@@ -102,6 +102,8 @@ FAIL: total < 5.0 OR min(A,B,C) < 2
 - FAIL → fix issues, re-audit (max 3 rounds). After 3 FAILs → mark phase blocked.
 
 If Agent dispatch unavailable: perform manual structured review (same 3 dimensions, same scoring) and flag as non_blocking_warning ("Manual review — Agent dispatch unavailable. Review is not independent.").
+
+**Gate is BLOCKING.** If FAIL → fix issues → re-audit (max 3 rounds). After 3 FAILs → mark phase blocked. Auto-mode: after 3 repair rounds → redo the weakest preceding phase → re-audit.
 
 Write `audit/gate-audit.md`.
 
@@ -242,7 +244,33 @@ Write results to `audit/adversarial-review.md` (if run).
 If Agent dispatch unavailable → skip adversarial review, note as non_blocking_warning.
 Adversarial review is ADVISORY, never blocking.
 
-### Step 9: Self-Validate
+### Step 9: Plugin Improvement Report
+
+After all audits complete, write `audit/plugin-improvements.md` with concrete suggestions for improving the Seek plugin itself:
+
+```markdown
+# Plugin Improvement Report
+## What worked well
+- [list specific skills/mechanisms that produced good results]
+
+## What caused friction
+- [list specific issues encountered — missing instructions, unclear steps, gaps]
+
+## Suggested fixes
+| Issue | Affected Skill | Suggested Fix |
+|-------|---------------|---------------|
+| [specific problem] | [skill name] | [concrete fix] |
+
+## Missing mechanisms
+- [list patterns from AutoResearch/GuideTree still not absorbed]
+
+## Quality assessment
+- [honest assessment of whether the plugin produced a "serious result"]
+```
+
+If the project has ZERO GOLD claims or all BRONZE, the improvement report MUST flag this as a plugin design issue: "The pipeline produced no rock-solid contributions — the skills may need stronger enforcement of code/experiment execution."
+
+### Step 10: Self-Validate
 
 Load `references/standards/audit-standards.md`. Check EVERY item:
 - [ ] Gate Audit: 3 Agents parallel? Total >= 6.5? Each >= 3?
@@ -267,7 +295,7 @@ ls audit/gate-audit.md audit/claims-audit.md audit/citation-audit.md audit/repro
 ```
 Missing files → blocking_issue.
 
-### Step 10: Update State
+### Step 11: Update State
 
 Update `guidetree/project.yaml`:
 - phases.audit.status = "done"
