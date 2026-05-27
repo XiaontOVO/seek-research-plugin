@@ -1,9 +1,9 @@
 {
     "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
     "name": "seek",
-    "description": "Foolproof research pipeline plugin — 9 skills, control/data plane architecture, phase→stage→step decomposition. Merges GuideTree hierarchical decomposition with AutoResearch domain expertise",
+    "description": "Foolproof research pipeline plugin. 9 skills with control/data plane architecture and phase-stage-step decomposition. Merges GuideTree hierarchical decomposition with AutoResearch domain expertise",
     "owner": {
-        "name": "Seek"
+        "name": "Seek Research"
     },
     "metadata": {
         "version": "1.0.0"
@@ -11,7 +11,7 @@
     "plugins": [
         {
             "name": "seek",
-            "description": "Foolproof research pipeline plugin — 9 skills, control/data plane architecture, phase→stage→step decomposition. Merges GuideTree hierarchical decomposition with AutoResearch domain expertise",
+            "description": "Foolproof research pipeline plugin. 9 skills with control/data plane architecture and phase-stage-step decomposition. Merges GuideTree hierarchical decomposition with AutoResearch domain expertise",
             "category": "research",
             "version": "1.0.0",
             "strict": true,
