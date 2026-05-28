@@ -1,14 +1,14 @@
 ﻿---
 name: review_literature
 family: literature
-description: > Zotero-first literature discovery, triage, deep-read, and comparison matrix. Queries Zotero local/Web API first, then arXiv MCP + paperplain MCP with 5-tier curl fallback chain. New papers imported to Zotero immediately. NOT for idea generation — use design_ideas. NOT for paper writing — use communicate.
+description: > LocalLiterature-first literature discovery, triage, deep-read, and comparison matrix. Searches D:/LocalLiterature PDFs first, then arXiv MCP + paperplain MCP with 5-tier curl fallback chain. New papers saved to LocalLiterature immediately. NOT for idea generation — use design_ideas. NOT for paper writing — use communicate.
 ---
 
 # review_literature
 
-**Core principle:** Zotero-first. Triage before download. No paper enters deep-read without a triage rationale. All potentially useful papers go to Zotero first.
+**Core principle:** LocalLiterature-first. Triage before download. No paper enters deep-read without a triage rationale. All potentially useful papers are noted in LocalLiterature.
 
-Zotero-first literature review engine. Searches the existing Zotero library for relevant papers. If not enough, searches external sources (arXiv MCP → paperplain MCP → arXiv curl → CrossRef curl → DBLP curl) and adds new papers to Zotero immediately. Then deep-reads selected papers and builds a 9-column comparison matrix to identify the research gap.
+LocalLiterature-first literature review engine. Searches D:/LocalLiterature for relevant PDFs. If not enough, searches external sources (arXiv MCP → paperplain MCP → arXiv curl → CrossRef curl → DBLP curl) and saves new papers to LocalLiterature. Then deep-reads selected papers and builds a 9-column comparison matrix to identify the research gap.
 
 ## When To Use
 
@@ -55,16 +55,17 @@ CRITICAL: After EVERY step below, write the output file to disk IMMEDIATELY. Do 
 ## Workflow
 
 ### Step 0: Pre-Flight Checks
-Before any search, verify connectivity and permissions:
+Before any search, verify local library and connectivity:
 ```bash
-# Zotero connectivity (if configured)
-curl -s --max-time 2 "http://localhost:23119/api/users/0/items?limit=1" -H "Zotero-Allowed-Request: true" 2>/dev/null && echo "ZOTERO_LOCAL_OK" || echo "ZOTERO_LOCAL_UNAVAILABLE"
+# LocalLiterature check
+ls "D:/LocalLiterature/" 2>/dev/null | head -20 && echo "LOCALLIT_OK" || echo "LOCALLIT_MISSING"
+find "D:/LocalLiterature/" -name "*.pdf" 2>/dev/null | wc -l && echo "PDFs found"
 # arXiv connectivity
 curl -s --connect-timeout 5 "https://export.arxiv.org/api/query?search_query=all:test&max_results=1" 2>/dev/null | grep -q "<id>" && echo "ARXIV_OK" || echo "ARXIV_DOWN"
 # MCP availability
 echo "MCP tools: arxiv_search=$(type mcp__arxiv__arxiv_search 2>/dev/null && echo yes || echo no)"
 ```
-Record which sources are available. If ALL fail → blocking_issue (no search possible). If some fail → non_blocking_warning, proceed with available sources.
+Record which sources are available. If ALL fail → blocking_issue (no search possible).
 
 **→ WRITE NOW: Create search-log.md immediately with pre-flight results. Do NOT wait.**
 ```bash
@@ -74,75 +75,55 @@ Write `literature/search-log.md` NOW with a header row and pre-flight status:
 ```markdown
 # Literature Search Log
 ## Pre-flight Status
-- Zotero: [AVAILABLE/UNAVAILABLE]
+- LocalLiterature: [OK/MISSING]
 - arXiv: [OK/DOWN]
 - MCP: [AVAILABLE/UNAVAILABLE]
 ## Searches (append after each search)
 | # | Source | Query | Results | Selected | Notes |
 |---|--------|-------|---------|----------|-------|
 ```
-Write this file BEFORE doing any searches. Append one row after each search attempt. Never wait until all searches are done.
+Write this file BEFORE doing any searches.
 
 ### Step 1: Load Inputs
-- project_context (research_question, zotero_status, constraints) from Phase 0
+- project_context (research_question, constraints) from Phase 0
 - If repair invocation: validation_feedback from prior failed self-validation
 
-### Step 2: Search Zotero Library (Zotero-first — ported from AutoResearch literature-zotero)
+### Step 2: Search LocalLiterature (Local-First — replaces Zotero)
 
-**Step 2a: Pre-Flight Permission Check**
-
-Before any Zotero API call, verify the API key exists and has correct permissions:
-```python
-import json, os, urllib.request
-
-cfg_path = os.path.expanduser("~/.zotero/config.json")
-if not os.path.exists(cfg_path):
-    print("ZOTERO_CONFIG_MISSING: ~/.zotero/config.json not found")
-    # Zotero not configured — record as non_blocking_warning, skip to Step 3 (external search)
-else:
-    with open(cfg_path) as f:
-        cfg = json.load(f)
-    API_KEY = cfg["api_key"]
-    resp = urllib.request.urlopen(
-        urllib.request.Request("https://api.zotero.org/keys/" + API_KEY,
-            headers={"Zotero-API-Key": API_KEY})
-    )
-    key_info = json.loads(resp.read())
-    has_write = key_info.get("access", {}).get("user", {}).get("write", False)
-    USER_ID = cfg["user_id"]
-    print(f"Zotero: user={USER_ID}, write={has_write}")
-```
-Decision tree:
-- config missing → non_blocking_warning, skip to external search
-- key invalid (401/403) → non_blocking_warning, skip to external search
-- key valid, no write → WARN (can read but not import new papers)
-- key valid, read+write → PASS
-
-**Step 2b: Search via Zotero Local API (read-only, requires Zotero desktop running)**
-
-Try local API first (fast, no rate limit):
+**Step 2a: List Available Papers**
 ```bash
-curl -s --max-time 3 "http://localhost:23119/api/users/0/items?q=<URL_ENCODED_KEYWORDS>&limit=50" -H "Zotero-Allowed-Request: true"
+# List all PDFs in the local library
+find "D:/LocalLiterature/" -name "*.pdf" -type f 2>/dev/null | head -100
+# List any metadata or note files
+find "D:/LocalLiterature/" -name "*.md" -o -name "*.json" -o -name "*.bib" -o -name "*.yaml" 2>/dev/null | head -50
 ```
-Parse the JSON response. Each item has: `data.title`, `data.creators`, `data.date`, `data.DOI`, `data.url`, `data.extra` (contains arXiv ID), `data.abstractNote`, `data.tags`, `data.collections`.
+If LOCALLIT_MISSING → non_blocking_warning, skip to Step 3 (external search).
 
-**Step 2c: Search via Zotero Web API (read+write, works even without desktop)**
-
-If local API unavailable or returns < 10 results, search via Web API:
+**Step 2b: Extract Paper Information**
+For each PDF found, extract metadata:
 ```python
-import urllib.request, json
-url = f"https://api.zotero.org/users/{USER_ID}/items?q=<URL_ENCODED_KEYWORDS>&limit=100"
-req = urllib.request.Request(url, headers={"Zotero-API-Key": API_KEY})
-resp = urllib.request.urlopen(req, timeout=10)
-items = json.loads(resp.read())
+import os, re
+from pathlib import Path
+
+papers = []
+for pdf in Path("D:/LocalLiterature/").rglob("*.pdf"):
+    info = {
+        "path": str(pdf),
+        "filename": pdf.stem,
+        "title": pdf.stem,
+        "arxiv_id": None if not (m := re.search(r'(\d{4}\.\d{4,5})', pdf.stem)) else m.group(1),
+    }
+    papers.append(info)
+
+# Sort by relevance to research question keywords
+# Papers with matching keywords in filename score higher
+print(f"Found {len(papers)} papers in LocalLiterature")
 ```
 
-**Step 2d: Score and Select**
-
-Score each paper by relevance to the RQ (match in title/abstract). Keep papers with score >= 3/5.
-If Zotero returns >= 10 relevant papers → skip external search entirely. Zotero is sufficient.
-If Zotero returns < 10 papers → proceed to Step 3 (external search) to supplement.
-If Zotero unavailable entirely → record as non_blocking_warning, proceed to Step 3.
+**Step 2c: Score and Select**
+Score each paper by filename/title match to RQ keywords. Keep papers with score >= 3/5.
+If LocalLiterature returns >= 10 relevant papers → skip external search entirely.
+If LocalLiterature returns < 10 papers → supplement with Step 3 (external search).
 
 ### Step 3: External Search (Five-Tier Fallback)
 
@@ -177,21 +158,13 @@ curl -s "https://api.crossref.org/works?query=<KEYWORDS>&rows=20&filter=type:jou
 curl -s "https://dblp.org/search/publ/api?q=<KEYWORDS>&format=json&h=20"
 ```
 
-**After each successful external search:** Import new papers to Zotero:
-```python
-import json, urllib.request, time
-# POST https://api.zotero.org/users/{user_id}/items
-# Headers: Zotero-API-Key, Content-Type: application/json
-# Body: {itemType, title, creators, DOI, url, extra, abstractNote}
-# time.sleep(0.3) between POSTs
-```
-
-Or use the bundled script:
+**After each successful external search:** Save paper metadata as a note in LocalLiterature:
 ```bash
-python d:/Research/plugin/seek/scripts/zotero_batch_import.py --source results.json --collection "Seek-Research"
+echo "[Paper info]" > "D:/LocalLiterature/<arxiv_id>-note.md"
 ```
+This builds the local library over time.
 
-**Deduplicate** by arXiv ID (from `extra` field) or DOI across all sources.
+**Deduplicate** by arXiv ID or title across all sources.
 
 **If ALL tiers fail** (rate-limited + network down): STOP trying after 3 attempts per tier. Use your KNOWLEDGE of known papers in the field — list by title, authors, year, venue, arXiv ID from memory. Mark all citations `_TODO_API_VERIFY_`. A literature review from domain knowledge with verification markers is better than an empty search log. Proceed immediately to paper notes and comparison matrix.
 

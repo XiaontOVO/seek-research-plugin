@@ -60,15 +60,12 @@ Record: OS, CPU (cores), GPU (model + VRAM), RAM (GB), disk free (GB), Python ve
 
 Write to `guidetree/context/hardware-profile.json`.
 
-### Step 2: Check Zotero
+### Step 2: Check LocalLiterature
 ```bash
-curl -s --max-time 2 "http://localhost:23119/api/users/0/items?limit=1" -H "Zotero-Allowed-Request: true" 2>/dev/null && echo "LOCAL_AVAILABLE" || echo "LOCAL_UNAVAILABLE"
+ls "D:/LocalLiterature/" 2>/dev/null | head -10 && echo "LOCALLIT_AVAILABLE" || echo "LOCALLIT_MISSING"
+find "D:/LocalLiterature/" -name "*.pdf" 2>/dev/null | wc -l && echo "PDFs in library"
 ```
-Check for Web API key:
-```bash
-cat ~/.zotero/config.json 2>/dev/null && echo "WEB_CONFIGURED" || echo "WEB_NOT_CONFIGURED"
-```
-Record status: available | unavailable | not_configured.
+Record status: available | missing. LocalLiterature is the primary paper source.
 
 ### Step 3: Socratic Interview
 
@@ -99,7 +96,7 @@ Write `guidetree/context/project-context.md` containing:
 - Constraints (time, compute, data)
 - Non-goals (explicitly out of scope)
 - Hardware profile summary
-- Zotero status
+- LocalLiterature status
 - Prior work inheritance (if any)
 - Unanswered questions (marked `_TODO_`)
 - Assumptions table (confirmed | likely | speculative)
@@ -112,7 +109,7 @@ Load `references/standards/context-standards.md`. Check EVERY item:
 - [ ] Falsification condition explicit, observable, non-circular?
 - [ ] Constraints explicit (time, compute, data)?
 - [ ] Hardware profile complete?
-- [ ] Zotero status recorded?
+- [ ] LocalLiterature status recorded?
 - [ ] Prior projects scanned?
 - [ ] All unanswered marked `_TODO_`?
 - [ ] No invented answers?

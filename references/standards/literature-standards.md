@@ -5,7 +5,7 @@
 ## Hard Rules
 
 ### Coverage
-- [ ] Zotero local library searched (all relevant collections/tags)
+- [ ] LocalLiterature (D:/LocalLiterature) searched for relevant PDFs
 - [ ] arXiv searched (at least 3 different keyword combinations covering different terminology)
 - [ ] paperplain searched (when research involves biology/medicine/cross-disciplinary topics)
 - [ ] Total search results ≥ 20 candidate papers
@@ -13,7 +13,7 @@
 ### Triage
 - [ ] Each candidate paper has a 1-2 sentence triage rationale (why included / why excluded)
 - [ ] Deep-read papers ≥ 5
-- [ ] Selected papers have complete metadata in Zotero (author, title, year, venue/journal, DOI)
+- [ ] Selected papers have complete metadata (author, title, year, venue/journal, DOI/arXiv ID)
 
 ### Analysis
 - [ ] Each deep-read paper has structured notes:
