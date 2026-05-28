@@ -1,7 +1,7 @@
 ﻿# Self-Check Schema — review_literature
 
 ## Input
-- [ ] project_context (RQ, constraints, zotero_status)
+- [ ] project_context (RQ, constraints, locallit_status)
 - [ ] If repair: validation_feedback from prior failed run
 
 ## Output Files (must exist on disk)
@@ -28,7 +28,7 @@ ls guidetree/state/execution_history.jsonl 2>/dev/null || echo "MISSING_EXECUTIO
 If MISSING_STAGE_DAG or MISSING_REGISTRY -> BLOCKING_ISSUE. Do NOT mark valid=true without control plane files.
 
 ## Self-Check
-- [ ] Zotero searched before arXiv (Zotero-first principle)?
+- [ ] LocalLiterature searched before arXiv (LocalLiterature-first)?
 - [ ] External search attempted >= 3 keyword combos across all viable tiers?
 - [ ] Every search recorded (including failures) in search-log.md?
 - [ ] Total unique candidates >= 20?

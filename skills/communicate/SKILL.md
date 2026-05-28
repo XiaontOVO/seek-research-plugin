@@ -133,7 +133,7 @@ Load `references/standards/writing-standards.md`. Check EVERY item:
 - [ ] Every figure has take-away message?
 - [ ] Hero figure shows core finding?
 - [ ] All figures from experiment data?
-- [ ] Every citation in Zotero?
+- [ ] Every citation has verified metadata?
 - [ ] Prior work from comparison matrix cited?
 - [ ] No hype words?
 - [ ] Quantitative results have baseline context?

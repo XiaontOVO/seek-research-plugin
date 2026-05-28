@@ -229,7 +229,7 @@ Write to `literature/gap-analysis.md`.
 ### Step 9: Self-Validate
 
 Load `references/standards/literature-standards.md`. Check EVERY item against produced output:
-- [ ] Zotero searched (if available)?
+- [ ] LocalLiterature searched (if available)?
 - [ ] External search attempted >= 3 keyword combinations across all viable tiers?
 - [ ] Total candidates >= 20?
 - [ ] Each candidate has triage rationale?

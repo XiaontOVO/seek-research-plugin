@@ -3,7 +3,7 @@
 ## Input
 - [ ] User's research description (raw text)
 - [ ] Hardware profile (from detect_hardware.py or manual)
-- [ ] Zotero status (checked via curl to localhost:23119)
+- [ ] LocalLiterature status (checked via ls D:/LocalLiterature/)
 
 ## Output Files (must exist on disk)
 - [ ] `guidetree/context/project-context.md`
@@ -15,7 +15,7 @@
 - [ ] **constraints**: time budget, compute budget, data availability (each explicit)
 - [ ] **non_goals**: things deliberately out of scope
 - [ ] **hardware_profile**: CPU, GPU, RAM, disk
-- [ ] **zotero_status**: `available | unavailable | not_configured`
+- [ ] **locallit_status**: `available | missing`
 - [ ] **prior_work**: inherited assets or "none found"
 - [ ] **unanswered_questions**: each marked `_TODO_` with reason
 - [ ] **assumptions**: each tagged `confirmed | likely | speculative`
@@ -25,7 +25,7 @@
 - [ ] No invented answers — vagueness surfaced, not filled in?
 - [ ] All constraints explicit (not "no constraints")?
 - [ ] Hardware profile complete (CPU, GPU, RAM, disk, Python version)?
-- [ ] Zotero status checked via actual API call (not assumed)?
+- [ ] LocalLiterature status checked via actual directory listing?
 - [ ] Prior projects scanned (even if none found)?
 - [ ] All files exist on disk? Verify: `ls guidetree/context/*`
 

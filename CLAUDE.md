@@ -31,7 +31,7 @@ Every phase skill MUST write these files BEFORE executing the phase. No exceptio
 
 **Step plan format:**
 ```json
-{"stage_id":"P1.S1","steps":[{"id":"P1.S1.S1","name":"Pre-flight","action":"curl Zotero","expected_output":"search-log.md header"}]}
+{"stage_id":"P1.S1","steps":[{"id":"P1.S1.S1","name":"Pre-flight","action":"ls D:/LocalLiterature/","expected_output":"search-log.md header"}]}
 ```
 
 **Artifact registry format:**
@@ -50,9 +50,9 @@ Every phase skill MUST write these files BEFORE executing the phase. No exceptio
 ## The Seek Research Pipeline
 
 ```
-define_context     (Phase 0: Pre-flight + Socratic interview + hardware detect + Zotero check)
+define_context     (Phase 0: Pre-flight + Socratic interview + hardware detect + LocalLiterature check)
      ↓
-review_literature  (Phase 1: Zotero-first → 5-tier fallback search → triage → deep-read → matrix)
+review_literature  (Phase 1: LocalLiterature-first → 5-tier fallback search → triage → deep-read → matrix)
      ↓
 discover_ideas     (Phase 2a: Divergent brainstorming → 8-12 ideas → filter → pilot top 2-3)
      ↓
@@ -75,8 +75,8 @@ Before ANY phase action, load the relevant standards file. Every checklist item 
 
 | Phase | Standards File | Pre-flight Checks |
 |-------|---------------|-------------------|
-| context | `context-standards.md` | Hardware detect, Zotero connectivity |
-| literature | `literature-standards.md` | Zotero API + network connectivity |
+| context | `context-standards.md` | Hardware detect, LocalLiterature availability |
+| literature | `literature-standards.md` | LocalLiterature + network connectivity |
 | ideas | `idea-standards.md` | Literature gap analysis loaded |
 | investigation | `coding-standards.md` + `experiment-standards.md` | Hardware, dependencies, disk space |
 | communication | `writing-standards.md` | Claims Matrix v2 loaded |

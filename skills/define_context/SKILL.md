@@ -1,7 +1,7 @@
 ﻿---
 name: define_context
 family: context
-description: > Research context definition. Socratic interview + hardware detection + Zotero check + prior work inheritance. Produces project_context.md that all downstream phases depend on. Invoked by orchestrator after /seeker. NOT for literature review — use review_literature. NOT for idea design — use design_ideas.
+description: > Research context definition. Socratic interview + hardware detection + LocalLiterature check + prior work inheritance. Produces project_context.md that all downstream phases depend on. Invoked by orchestrator after /seeker. NOT for literature review — use review_literature. NOT for idea design — use design_ideas.
 ---
 
 # define_context

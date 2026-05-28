@@ -23,7 +23,7 @@
 - [ ] Every number in tables/figures traceable to a raw_record.json
 
 ### Citations
-- [ ] Every citation has complete metadata in Zotero
+- [ ] Every citation has complete metadata (author, title, year, venue, DOI/arXiv ID)
 - [ ] Citations cover all prior work from the comparison matrix
 - [ ] Key claim-supporting citations are peer-reviewed versions (not arXiv preprints)
 - [ ] No "ghost citations" (appearing only in bibliography but never cited in text)

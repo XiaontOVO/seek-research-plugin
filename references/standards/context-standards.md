@@ -27,10 +27,10 @@
 - [ ] Available disk space recorded
 - [ ] Python version and key libraries recorded
 
-### Zotero Status
-- [ ] Zotero local API availability checked (http://localhost:23119)
-- [ ] Zotero Web API key availability checked
-- [ ] Status recorded: available | unavailable | not_configured
+### LocalLiterature Status
+- [ ] LocalLiterature directory exists (D:/LocalLiterature/)
+- [ ] PDF count and metadata files checked
+- [ ] Status recorded: available | missing
 
 ### Prior Work Inheritance
 - [ ] Prior project directories scanned for GOLD_MANIFEST.md, design-brief.md, experiment data
