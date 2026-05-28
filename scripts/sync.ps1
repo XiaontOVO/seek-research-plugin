@@ -41,7 +41,7 @@ Write-Host "  Marketplaces updated." -ForegroundColor Green
 Write-Host "`n[3/3] Updating cache..." -ForegroundColor Yellow
 Remove-Item -Recurse -Force $CacheDir -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $CacheDir | Out-Null
-Copy-Item -Recurse -Force "$MarketplaceDir\*" $CacheDir
+Copy-Item -Recurse -Force "$MarketplaceDir\*" "$CacheDir\seek\"
 Write-Host "  Cache updated." -ForegroundColor Green
 
 # Verify
