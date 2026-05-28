@@ -52,7 +52,7 @@ Every phase skill MUST write these files BEFORE executing the phase. No exceptio
 ```
 define_context     (Phase 0: Pre-flight + Socratic interview + hardware detect + LocalLiterature check)
      ↓
-review_literature  (Phase 1: LocalLiterature-first → 5-tier fallback search → triage → deep-read → matrix)
+review_literature  (Phase 1: LocalLiterature-only — SQLite FTS search → import_papers.py supplement if needed → sub-Agent deep-read + 5-dim scoring → agent_update.py → matrix)
      ↓
 discover_ideas     (Phase 2a: Divergent brainstorming → 8-12 ideas → filter → pilot top 2-3)
      ↓

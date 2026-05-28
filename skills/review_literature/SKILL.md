@@ -1,14 +1,12 @@
-﻿---
+---
 name: review_literature
 family: literature
-description: > LocalLiterature-first literature discovery, triage, deep-read, and comparison matrix. Searches D:/LocalLiterature PDFs first, then arXiv MCP + paperplain MCP with 5-tier curl fallback chain. New papers saved to LocalLiterature immediately. NOT for idea generation — use design_ideas. NOT for paper writing — use communicate.
+description: > LocalLiterature-only literature discovery, triage, deep-read, and comparison matrix. All operations go through D:/LocalLiterature SQLite database (library.db). Reads HTML/PDF from LocalLiterature. Imports new papers via LocalLiterature's import pipeline when local collection is insufficient. Sub-agents do deep-read + 5-dimension scoring per LocalLiterature's agent.md protocol. NOT for idea generation — use design_ideas. NOT for paper writing — use communicate.
 ---
 
 # review_literature
 
-**Core principle:** LocalLiterature-first. Triage before download. No paper enters deep-read without a triage rationale. All potentially useful papers are noted in LocalLiterature.
-
-LocalLiterature-first literature review engine. Searches D:/LocalLiterature for relevant PDFs. If not enough, searches external sources (arXiv MCP → paperplain MCP → arXiv curl → CrossRef curl → DBLP curl) and saves new papers to LocalLiterature. Then deep-reads selected papers and builds a 9-column comparison matrix to identify the research gap.
+**Core principle:** LocalLiterature-only. 所有文献操作必须通过 `D:/LocalLiterature` 进行。不自行搜索外部源。检索走 SQLite，精读走子 Agent + HTML，评分走 `agent_update.py`。
 
 ## When To Use
 
@@ -55,17 +53,29 @@ CRITICAL: After EVERY step below, write the output file to disk IMMEDIATELY. Do 
 ## Workflow
 
 ### Step 0: Pre-Flight Checks
-Before any search, verify local library and connectivity:
+
+Before any search, verify LocalLiterature database and connectivity:
+
 ```bash
-# LocalLiterature check
-ls "D:/LocalLiterature/" 2>/dev/null | head -20 && echo "LOCALLIT_OK" || echo "LOCALLIT_MISSING"
-find "D:/LocalLiterature/" -name "*.pdf" 2>/dev/null | wc -l && echo "PDFs found"
-# arXiv connectivity
-curl -s --connect-timeout 5 "https://export.arxiv.org/api/query?search_query=all:test&max_results=1" 2>/dev/null | grep -q "<id>" && echo "ARXIV_OK" || echo "ARXIV_DOWN"
-# MCP availability
-echo "MCP tools: arxiv_search=$(type mcp__arxiv__arxiv_search 2>/dev/null && echo yes || echo no)"
+# LocalLiterature database check
+ls "D:/LocalLiterature/library.db" 2>/dev/null && echo "DB_OK" || echo "DB_MISSING"
+ls "D:/LocalLiterature/pdfs/" 2>/dev/null | wc -l && echo "PDFs in dir"
+ls "D:/LocalLiterature/htmls/" 2>/dev/null | wc -l && echo "HTMLs in dir"
+
+# Quick database query to verify it's readable
+cd "D:/LocalLiterature" && python -c "
+import sys; sys.path.insert(0, 'scripts')
+from common import get_db
+conn = get_db()
+count = conn.execute('SELECT COUNT(*) FROM papers').fetchone()[0]
+scored = conn.execute('SELECT COUNT(*) FROM papers WHERE score IS NOT NULL').fetchone()[0]
+notes = conn.execute('SELECT COUNT(*) FROM notes').fetchone()[0]
+print(f'Total papers: {count}, Scored: {scored}, Notes: {notes}')
+conn.close()
+"
 ```
-Record which sources are available. If ALL fail → blocking_issue (no search possible).
+
+If DB_MISSING → blocking_issue (no literature search possible).
 
 **→ WRITE NOW: Create search-log.md immediately with pre-flight results. Do NOT wait.**
 ```bash
@@ -75,133 +85,252 @@ Write `literature/search-log.md` NOW with a header row and pre-flight status:
 ```markdown
 # Literature Search Log
 ## Pre-flight Status
-- LocalLiterature: [OK/MISSING]
-- arXiv: [OK/DOWN]
-- MCP: [AVAILABLE/UNAVAILABLE]
+- LocalLiterature DB: [OK/MISSING]
+- Papers: [N total, M scored, K with notes]
+- PDFs: [N files]
+- HTMLs: [N files]
 ## Searches (append after each search)
-| # | Source | Query | Results | Selected | Notes |
+| # | Method | Query | Results | Selected | Notes |
 |---|--------|-------|---------|----------|-------|
 ```
 Write this file BEFORE doing any searches.
 
 ### Step 1: Load Inputs
+
 - project_context (research_question, constraints) from Phase 0
 - If repair invocation: validation_feedback from prior failed self-validation
 
-### Step 2: Search LocalLiterature (Local-First — replaces Zotero)
+### Step 2: Search LocalLiterature (SQLite FTS + LIKE)
 
-**Step 2a: List Available Papers**
+All searches go through `D:/LocalLiterature/library.db`. Use the `retrieve.py` API or direct SQL.
+
+**Step 2a: FTS Full-Text Search**
+
 ```bash
-# List all PDFs in the local library
-find "D:/LocalLiterature/" -name "*.pdf" -type f 2>/dev/null | head -100
-# List any metadata or note files
-find "D:/LocalLiterature/" -name "*.md" -o -name "*.json" -o -name "*.bib" -o -name "*.yaml" 2>/dev/null | head -50
-```
-If LOCALLIT_MISSING → non_blocking_warning, skip to Step 3 (external search).
-
-**Step 2b: Extract Paper Information**
-For each PDF found, extract metadata:
-```python
-import os, re
-from pathlib import Path
-
-papers = []
-for pdf in Path("D:/LocalLiterature/").rglob("*.pdf"):
-    info = {
-        "path": str(pdf),
-        "filename": pdf.stem,
-        "title": pdf.stem,
-        "arxiv_id": None if not (m := re.search(r'(\d{4}\.\d{4,5})', pdf.stem)) else m.group(1),
-    }
-    papers.append(info)
-
-# Sort by relevance to research question keywords
-# Papers with matching keywords in filename score higher
-print(f"Found {len(papers)} papers in LocalLiterature")
+cd "D:/LocalLiterature" && python -c "
+import sys, json; sys.path.insert(0, 'scripts')
+from retrieve import search_fts
+results = search_fts('YOUR_QUERY_HERE', limit=20, min_score=0)
+for p in results:
+    score_str = f\"{p['score']:.1f}\" if p.get('score') else 'N/A'
+    print(f\"[{score_str}] {p.get('arxiv_id', 'N/A')} ({p.get('year', '?')}) {p['title'][:80]}\")
+"
 ```
 
-**Step 2c: Score and Select**
-Score each paper by filename/title match to RQ keywords. Keep papers with score >= 3/5.
-If LocalLiterature returns >= 10 relevant papers → skip external search entirely.
-If LocalLiterature returns < 10 papers → supplement with Step 3 (external search).
+Use at least 3 different keyword combinations derived from the RQ. For Chinese or complex queries, the `search_fts` function automatically falls back to `LIKE` pattern matching.
 
-### Step 3: External Search (Five-Tier Fallback)
+**Step 2b: Collection Filter**
 
-Use at least 3 different keyword combinations derived from the RQ. If one tier fails (429, empty, error), automatically try the next.
-
-**Tier 1 — arXiv MCP:**
-```
-mcp__arxiv__arxiv_search(query="<keywords>", max_results=20, sort_by="relevance")
-mcp__arxiv__arxiv_search(query="<alternative keywords>", max_results=20, sort_by="submitted")
-```
-
-**Tier 2 — paperplain MCP:**
-```
-mcp__paperplain__search_research(query="<keywords>", max_results=15)
-```
-
-**Tier 3 — arXiv curl REST API:**
-Use `+AND+` between terms — spaces become OR, which returns noise.
+If the project has a known collection tag:
 ```bash
-curl -s "https://export.arxiv.org/api/query?search_query=all:<TERM1>+AND+all:<TERM2>&start=0&max_results=20&sortBy=relevance"
+cd "D:/LocalLiterature" && python -c "
+import sys, json; sys.path.insert(0, 'scripts')
+from retrieve import search_collection
+results = search_collection('COLLECTION_NAME', limit=20, min_score=6.0)
+for p in results:
+    score_str = f\"{p['score']:.1f}\" if p.get('score') else 'N/A'
+    print(f\"[{score_str}] {p.get('arxiv_id', 'N/A')} ({p.get('year', '?')}) {p['title'][:80]}\")
+"
 ```
-Parse XML: `<entry>` → `<id>`, `<title>`, `<summary>`, `<author>`, `<published>`.
-If no results, simplify to fewer AND terms.
 
-**Tier 4 — CrossRef curl REST API:**
+**Step 2c: Score-Threshold Browse**
+
 ```bash
-curl -s "https://api.crossref.org/works?query=<KEYWORDS>&rows=20&filter=type:journal-article"
+cd "D:/LocalLiterature" && python -c "
+import sys; sys.path.insert(0, 'scripts')
+from common import get_db
+conn = get_db()
+c = conn.cursor()
+c.execute('SELECT id, arxiv_id, title, authors, year, score, pdf_path FROM papers WHERE score >= ? ORDER BY score DESC NULLS LAST LIMIT 30', (6.0,))
+for row in c.fetchall():
+    print(f'[{row[\"score\"]:.1f}] {row[\"arxiv_id\"]} ({row[\"year\"]}) {row[\"title\"][:80]}')
+conn.close()
+"
 ```
 
-**Tier 5 — DBLP curl REST API:**
+**Step 2d: Direct SQL for Complex Queries**
+
 ```bash
-curl -s "https://dblp.org/search/publ/api?q=<KEYWORDS>&format=json&h=20"
+cd "D:/LocalLiterature" && python -c "
+import sys; sys.path.insert(0, 'scripts')
+from common import get_db
+conn = get_db()
+c = conn.cursor()
+# Example: search by keyword in title/abstract + year filter
+c.execute('''
+    SELECT id, arxiv_id, title, authors, year, score, pdf_path
+    FROM papers
+    WHERE (title LIKE ? OR abstract LIKE ?) AND year >= ?
+    ORDER BY score DESC NULLS LAST
+    LIMIT 30
+''', ('%KEYWORD%', '%KEYWORD%', '2023'))
+for row in c.fetchall():
+    print(f'[{row[\"score\"]:.1f}] {row[\"arxiv_id\"]} ({row[\"year\"]}) {row[\"title\"][:80]}')
+conn.close()
+"
 ```
 
-**After each successful external search:** Save paper metadata as a note in LocalLiterature:
+**Step 2e: Evaluate Results**
+
+- If LocalLiterature returns >= 10 relevant papers → skip to Step 4 (Triage)
+- If LocalLiterature returns < 10 relevant papers → proceed to Step 3 (Import to supplement)
+
+### Step 3: Import New Papers (Only If Local Collection Insufficient)
+
+**This is the ONLY way to add new papers.** Do NOT search external sources independently. Use LocalLiterature's `import_papers.py` which handles: arXiv API search → dedup → score_paper filter (>= 6.0) → download PDF → insert into library.db → rebuild FTS.
+
 ```bash
-echo "[Paper info]" > "D:/LocalLiterature/<arxiv_id>-note.md"
+cd "D:/LocalLiterature" && python scripts/import_papers.py "YOUR_QUERY_HERE" 20 COLLECTION_NAME
 ```
-This builds the local library over time.
 
-**Deduplicate** by arXiv ID or title across all sources.
+This script:
+1. Searches arXiv API via `search.py`
+2. Deduplicates against existing papers in library.db
+3. Scores candidates with `score_paper` (threshold >= 6.0)
+4. Downloads PDFs to `pdfs/`
+5. Inserts into `papers` table
+6. Rebuilds FTS index
 
-**If ALL tiers fail** (rate-limited + network down): STOP trying after 3 attempts per tier. Use your KNOWLEDGE of known papers in the field — list by title, authors, year, venue, arXiv ID from memory. Mark all citations `_TODO_API_VERIFY_`. A literature review from domain knowledge with verification markers is better than an empty search log. Proceed immediately to paper notes and comparison matrix.
+After import, re-run Step 2 searches to find the newly imported papers.
+
+**If import fails (network down, rate-limited):** Use your KNOWLEDGE of known papers in the field — list by title, authors, year, venue, arXiv ID from memory. Mark all citations `_TODO_IMPORT_VERIFY_`. A literature review from domain knowledge with verification markers is better than an empty search log. When network is available later, run:
+```bash
+cd "D:/LocalLiterature" && python scripts/import_papers.py "QUERY" 20
+```
 
 ### Step 4: Write Search Log
 
 Write `literature/search-log.md`:
-| # | Source | Query | Results | Selected | Notes |
+| # | Method | Query | Results | Selected | Notes |
+|---|--------|-------|---------|----------|-------|
 
-Record EVERY search attempt, including rate-limited/failed ones.
-If total unique candidates < 20 → expand search terms, re-run from Tier 1.
+Record EVERY search attempt, including failed ones.
+If total unique candidates < 20 → expand search terms, re-run from Step 2.
 
 → CHECKPOINT: Write search-log.md NOW. Verify: `ls literature/search-log.md`. Then continue.
 
 ### Step 5: Triage Papers
 
-For each candidate:
-1. Read abstract via MCP: `mcp__arxiv__arxiv_read_paper(paper_id="ID", max_characters=2000)` or curl: `curl -s "https://export.arxiv.org/api/query?id_list=ID"` (parse `<summary>` tag)
-2. Write 1-2 sentence triage rationale: why include or exclude
-3. Select >= 5 papers for deep-read based on relevance and diversity
+For each candidate from the SQLite search results:
+1. Read abstract from the database (already available from the `papers` table)
+2. Check if analysis/study notes already exist in the `notes` table:
+```bash
+cd "D:/LocalLiterature" && python -c "
+import sys; sys.path.insert(0, 'scripts')
+from common import get_db
+conn = get_db()
+c = conn.cursor()
+c.execute('SELECT p.id, p.arxiv_id, p.title, p.score, n.note_type, LENGTH(n.content) as note_len FROM papers p LEFT JOIN notes n ON n.paper_id = p.id WHERE p.id = ?', (PAPER_ID,))
+for row in c.fetchall():
+    print(f'ID={row[0]} {row[1]} score={row[3]} note[{row[4]}]={row[5]} chars')
+conn.close()
+"
+```
+3. Write 1-2 sentence triage rationale: why include or exclude
+4. Select >= 5 papers for deep-read based on relevance and diversity
 
-Triage-before-download: do NOT download PDFs at this stage. MCP/curl abstract reading is sufficient.
+Papers that already have analysis notes in the database can be used directly — their notes are already curated. Prioritize papers with existing analysis for efficiency.
 
-### Step 6: Deep-Read Selected Papers
+### Step 6: Deep-Read Selected Papers via Sub-Agents
+
+**CRITICAL: Per LocalLiterature's agent.md, deep-read + scoring MUST be done by spawning sub-Agents.** Do NOT read full paper text in the main context and score yourself. Each paper gets its own sub-Agent.
 
 For each selected paper:
-1. Read full text: `mcp__arxiv__arxiv_read_paper(paper_id="ID")` (HTML render). If HTML unavailable, note PDF URL for later retrieval.
-2. Read only: abstract, introduction, method, key results, conclusion. Skip appendices.
-3. Write structured notes to `literature/paper-notes/<id>-note.md`:
-   - **Citation:** Authors (Year). Venue.
-   - **Research Question:** [1 sentence]
-   - **Method:** [Concrete details — what they actually did]
-   - **Data:** [What they tested on]
-   - **Main Claim:** [Their core contribution]
-   - **Evidence Strength:** [0-10, with justification]
-   - **Limitations:** [Their own + your assessment]
-   - **Relevance:** [0-10 to your RQ]
-   - **Use As:** [baseline | inspiration | contrast | citation-only]
+
+**Step 6a: Check if paper already has analysis + study notes**
+```bash
+cd "D:/LocalLiterature" && python -c "
+import sys; sys.path.insert(0, 'scripts')
+from common import get_db
+conn = get_db()
+c = conn.cursor()
+c.execute(\"SELECT note_type, LENGTH(content) FROM notes WHERE paper_id = ?\", (PAPER_ID,))
+for row in c.fetchall():
+    print(f'{row[0]}: {row[1]} chars')
+conn.close()
+"
+```
+
+If BOTH analysis and study notes exist → skip to writing `literature/paper-notes/<id>-note.md` from the existing notes. No need to re-analyze.
+
+**Step 6b: Spawn sub-Agent for papers missing analysis**
+
+Per LocalLiterature's agent.md protocol, spawn a sub-Agent for each paper that needs analysis:
+
+```
+Agent(prompt="""
+You are a LocalLiterature analysis sub-Agent. Analyze paper ID={PAPER_ID}.
+
+Steps:
+1. Read the paper's HTML file from D:/LocalLiterature/htmls/{arxiv_id}.html (use Read tool)
+   - If HTML unavailable or too short, read PDF from D:/LocalLiterature/pdfs/{arxiv_id}.pdf
+   - If both unavailable, use arXiv MCP as last resort: mcp__arxiv__arxiv_read_paper(paper_id="{arxiv_id}")
+2. Write analysis report following templates/analysis_template.md (Chinese Markdown)
+3. Write study note following templates/study_note_template.md (Chinese Markdown)
+4. Include the 5-dimension scoring table (0-10 scale):
+   | 维度 | 分数 | 依据 |
+   |------|------|------|
+   | 问题重要性 | X/10 | ... |
+   | 方法新颖性 | X/10 | ... |
+   | 理论严谨性 | X/10 | ... |
+   | 实验充分性 | X/10 | ... |
+   | 实用可部署性 | X/10 | ... |
+   Do NOT calculate the total — agent_update.py will auto-calculate.
+5. Write tmp_result_{PAPER_ID}.json with {"analysis": "...", "study_note": "..."}
+6. Run: cd D:/LocalLiterature && python scripts/agent_update.py {PAPER_ID} --file tmp_result_{PAPER_ID}.json
+7. Delete the temporary JSON file
+
+Paper metadata:
+- Title: {title}
+- Authors: {authors}
+- Year: {year}
+- arXiv ID: {arxiv_id}
+- PDF: D:/LocalLiterature/pdfs/{arxiv_id}.pdf
+- HTML: D:/LocalLiterature/htmls/{arxiv_id}.html
+
+All output must be in Chinese (中文). Score based on actual paper content, never guess.
+""")
+```
+
+**Step 6c: Write paper notes to literature/ output**
+
+After each paper (whether newly analyzed or using existing notes), write structured notes to `literature/paper-notes/<id>-note.md`:
+
+```markdown
+# {Title}
+
+**Citation:** Authors (Year). Venue.
+**arXiv ID:** {arxiv_id}
+**LocalLiterature Score:** {score}/10
+**LocalLiterature Path:** D:/LocalLiterature/pdfs/{arxiv_id}.pdf
+
+## Summary
+[From analysis note — 问题与定位 section]
+
+## Method
+[From analysis note — 方法评估 section]
+
+## Key Results
+[From analysis note — 实验评估 section]
+
+## Scoring
+| 维度 | 分数 | 依据 |
+|------|------|------|
+| 问题重要性 | X/10 | ... |
+| 方法新颖性 | X/10 | ... |
+| 理论严谨性 | X/10 | ... |
+| 实验充分性 | X/10 | ... |
+| 实用可部署性 | X/10 | ... |
+
+## Limitations
+[From analysis note — 关键风险提示 section]
+
+## Relevance to RQ
+[0-10, with justification — written by main agent based on project RQ]
+
+## Use As
+[baseline | inspiration | contrast | citation-only]
+```
 
 → CHECKPOINT: Write THIS paper note to disk NOW before reading the next paper. Verify: `ls literature/paper-notes/`.
 
@@ -229,12 +358,14 @@ Write to `literature/gap-analysis.md`.
 ### Step 9: Self-Validate
 
 Load `references/standards/literature-standards.md`. Check EVERY item against produced output:
-- [ ] LocalLiterature searched (if available)?
-- [ ] External search attempted >= 3 keyword combinations across all viable tiers?
+- [ ] LocalLiterature SQLite searched (FTS + LIKE + collection)?
+- [ ] If insufficient, import_papers.py used to supplement?
 - [ ] Total candidates >= 20?
 - [ ] Each candidate has triage rationale?
 - [ ] Deep-read papers >= 5?
-- [ ] Each deep-read paper has complete structured notes?
+- [ ] Deep-read done via sub-Agents (not in main context)?
+- [ ] Sub-Agent results written back to library.db via agent_update.py?
+- [ ] Each deep-read paper has complete structured notes in literature/paper-notes/?
 - [ ] Comparison matrix >= 5 rows x 9 columns?
 - [ ] Research gap stated in <= 3 sentences?
 
@@ -257,6 +388,17 @@ Update `guidetree/project.yaml`:
 - phases.literature.valid = (true/false)
 - phases.literature.artifacts = { search_log, paper_notes, comparison_matrix, gap_analysis }
 - If valid: set current_phase = "ideas"
+
+## Key Rules (LocalLiterature-specific)
+
+1. **All searches through SQLite** — never search arXiv/paperplain/crossref/DBLP directly. Use `D:/LocalLiterature/library.db` via `retrieve.py` or direct SQL.
+2. **New papers only via import_papers.py** — this handles arXiv API search, dedup, scoring, PDF download, and database insertion.
+3. **Deep-read via sub-Agents** — per LocalLiterature's agent.md, each paper must be analyzed by a separate sub-Agent that reads HTML/PDF, writes analysis + study notes, and updates library.db via `agent_update.py`.
+4. **Read HTML first** — sub-Agents must try `htmls/{arxiv_id}.html` before PDF or arXiv MCP.
+5. **5-dimension scoring** — use LocalLiterature's scoring dimensions (问题重要性/方法新颖性/理论严谨性/实验充分性/实用可部署性), NOT the old 9-column evidence strength.
+6. **All notes in Chinese** — per LocalLiterature's convention, analysis reports and study notes must be in 中文.
+7. **Reuse existing notes** — if a paper already has analysis + study notes in the `notes` table, extract from there instead of re-analyzing.
+8. **Score auto-calculation** — sub-Agents must NOT calculate the total score. `agent_update.py` auto-extracts 5 dimension scores and computes the weighted total.
 
 ## Output
 

@@ -5,8 +5,8 @@
 | # | Skill | Family | Description |
 |---|-------|--------|-------------|
 | 1 | `seek:orchestrate` | orchestration | State machine: inspect pipeline state, select next skill, enforce validation gates |
-| 2 | `seek:define_context` | context | Phase 0 — Research framing: Socratic interview, hardware detection, Zotero check |
-| 3 | `seek:review_literature` | literature | Phase 1 — Zotero-first discovery, 5-tier fallback, triage, deep-read, comparison matrix |
+| 2 | `seek:define_context` | context | Phase 0 — Research framing: Socratic interview, hardware detection, LocalLiterature check |
+| 3 | `seek:review_literature` | literature | Phase 1 — LocalLiterature-only: SQLite FTS search, import_papers.py supplement, sub-Agent deep-read + 5-dim scoring, comparison matrix |
 | 4 | `seek:discover_ideas` | ideas | Phase 2a — Divergent: brainstorm 8-12 ideas from gaps, filter, pilot top 2-3 |
 | 5 | `seek:design_ideas` | ideas | Phase 2b — Convergent: Socratic design, Claims DAG, Matrix v1, novelty gate, roadmap |
 | 6 | `seek:investigate` | investigation | Phase 3 — Claims-driven unified code+experiment loop |

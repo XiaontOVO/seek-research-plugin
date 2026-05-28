@@ -43,8 +43,7 @@ Every line of code serves an experimental purpose. Every experiment tests a spec
 
 ## Requirements
 
-- Zotero (optional, for literature management)
-- MCP tools: arXiv, paperplain (for literature search)
+- LocalLiterature (D:/LocalLiterature) — required, the sole literature source. All papers managed via SQLite (library.db).
 - Python 3.8+ (for hardware detection script)
 
 ## Output
@@ -61,7 +60,7 @@ All outputs under `D:/Research/plugin/seek/test/test2/docs/seek/`:
 
 Seek merges the best of two plugins:
 - **GuideTree** — hierarchical decomposition (Project→Phase→Stage→Step), validation gates, orchestrator state machine, repair-by-reinvocation
-- **AutoResearch** — Zotero-first literature, MCP search, 6-file experiment contract, multi-agent blank-context review, Claims-Evidence Matrix, Socratic design interviews
+- **AutoResearch** — LocalLiterature-only literature, SQLite search, 6-file experiment contract, multi-agent blank-context review, Claims-Evidence Matrix, Socratic design interviews
 
 ## License
 

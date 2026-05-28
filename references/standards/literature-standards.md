@@ -5,9 +5,9 @@
 ## Hard Rules
 
 ### Coverage
-- [ ] LocalLiterature (D:/LocalLiterature) searched for relevant PDFs
-- [ ] arXiv searched (at least 3 different keyword combinations covering different terminology)
-- [ ] paperplain searched (when research involves biology/medicine/cross-disciplinary topics)
+- [ ] LocalLiterature (D:/LocalLiterature/library.db) searched via `retrieve.py` or direct SQL (FTS + LIKE + collection + score-threshold)
+- [ ] Search performed with >= 3 different keyword combinations
+- [ ] If local collection < 10 relevant papers, `import_papers.py` used to supplement
 - [ ] Total search results ≥ 20 candidate papers
 
 ### Triage

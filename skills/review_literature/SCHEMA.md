@@ -28,12 +28,15 @@ ls guidetree/state/execution_history.jsonl 2>/dev/null || echo "MISSING_EXECUTIO
 If MISSING_STAGE_DAG or MISSING_REGISTRY -> BLOCKING_ISSUE. Do NOT mark valid=true without control plane files.
 
 ## Self-Check
-- [ ] LocalLiterature searched before arXiv (LocalLiterature-first)?
-- [ ] External search attempted >= 3 keyword combos across all viable tiers?
+- [ ] LocalLiterature (D:/LocalLiterature/library.db) searched via multiple methods (FTS + LIKE + collection + score-threshold)?
+- [ ] Search performed with >= 3 different keyword combinations?
+- [ ] If local collection insufficient, `import_papers.py` used to supplement?
 - [ ] Every search recorded (including failures) in search-log.md?
 - [ ] Total unique candidates >= 20?
 - [ ] Each candidate has 1-2 sentence triage rationale?
 - [ ] Deep-read papers >= 5?
+- [ ] Deep-read done via sub-Agents (LocalLiterature agent.md protocol)?
+- [ ] Sub-Agent results written back to library.db via agent_update.py?
 - [ ] Comparison matrix >= 5 rows, all 9 columns filled?
 - [ ] Gap analysis is specific to THIS RQ (not generic)?
 - [ ] All files exist on disk? Verify: `ls literature/search-log.md literature/comparison-matrix.md literature/gap-analysis.md`

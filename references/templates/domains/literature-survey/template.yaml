@@ -16,8 +16,8 @@ scope:
     - Patent prior art search (use patent-search domain)
 
 core_principles:
-  - Zotero-first: all papers in Zotero before selection
-  - Triage before download: read abstracts before fetching PDFs
+  - LocalLiterature-only: all papers managed in D:/LocalLiterature/library.db (SQLite)
+  - Triage before deep-read: read abstracts from library.db before sub-Agent analysis
   - Comparison matrix is the central artifact
   - Research gap drives the narrative
 
@@ -30,7 +30,7 @@ phase_archetypes:
     purpose: Systematic search, triage, deep-read, comparison matrix
     typical_stages:
       - id: search
-        goal: Multi-source discovery with fallback chain
+        goal: LocalLiterature SQLite discovery (FTS + LIKE + collection + score-threshold)
       - id: triage
         goal: Filter candidates, select deep-read set
       - id: deep_read

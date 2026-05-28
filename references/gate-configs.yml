@@ -11,7 +11,7 @@ gates:
       - "D:/Research/plugin/seek/test/test2/docs/seek/phase-1-literature/comparison-matrix.md"
       - "D:/Research/plugin/seek/test/test2/docs/seek/phase-1-literature/gap-analysis.md"
     domain_dimensions:
-      - "Source diversity (Zotero + arXiv + paperplain coverage)"
+      - "Source coverage (LocalLiterature SQLite: FTS + LIKE + collection + score-threshold, >= 20 candidates)"
       - "Coverage breadth (>= 20 candidates, >= 5 deep-read)"
       - "Recency (recent papers included, not only classics)"
       - "Gap specificity (research gap is specific to RQ, not generic)"

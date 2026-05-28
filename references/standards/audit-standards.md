@@ -24,7 +24,7 @@
 - [ ] Discovered mismatches fixed or flagged as known limitations
 
 ### Citation Audit (3-Layer Verification)
-- [ ] Layer 1 — Existence: every cited paper is real (DOI/DBLP/CrossRef verified)
+- [ ] Layer 1 — Existence: every cited paper is real (LocalLiterature SQLite / DOI / arXiv verified)
 - [ ] Layer 2 — Metadata: author, title, year, venue/journal information is correct
 - [ ] Layer 3 — Context: the cited content actually supports the claim being made (citation A cannot be cited for claim X if A says the opposite)
 

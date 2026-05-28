@@ -129,8 +129,8 @@ Write `audit/claims-audit.md`.
 ### Step 4: Citation Audit (3-Layer)
 
 **Layer 1 — Existence:** Verify every cited paper. Priority order:
-1. `mcp__arxiv__arxiv_get_metadata(paper_ids=[...])` — fastest, covers arXiv papers
-2. `mcp__paperplain__fetch_paper(paper_id="DOI")` — covers DOI/published papers
+1. Check `D:/LocalLiterature/library.db` via SQLite — fastest, covers all local papers
+2. `mcp__arxiv__arxiv_get_metadata(paper_ids=[...])` — for arXiv papers not yet in LocalLiterature
 3. **FALLBACK (when APIs down):** `WebSearch(query="<paper title> arXiv")` or `curl -s "https://api.crossref.org/works?query=<title>"` to verify existence. NEVER leave a citation as unverified without trying all fallback methods. Mark as `@confidence: likely` ONLY after exhausting all fallbacks.
 
 **Layer 2 — Metadata:** Author, title, year, venue correct against canonical source.
