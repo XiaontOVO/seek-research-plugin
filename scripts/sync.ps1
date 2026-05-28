@@ -20,6 +20,7 @@ if ($status) {
     git add -A
     git commit -m "sync: auto-commit from dev" 2>&1 | Out-Null
 }
+$env:GIT_SSL_NO_VERIFY = "1"
 git push origin master 2>&1 | ForEach-Object { Write-Host "  $_" }
 Pop-Location
 Write-Host "  Push complete." -ForegroundColor Green
@@ -28,21 +29,23 @@ Write-Host "  Push complete." -ForegroundColor Green
 Write-Host "`n[2/3] Updating marketplaces..." -ForegroundColor Yellow
 if (Test-Path "$MarketplaceDir\.git") {
     Push-Location $MarketplaceDir
+    $env:GIT_SSL_NO_VERIFY = "1"
     git pull origin master 2>&1 | ForEach-Object { Write-Host "  $_" }
     Pop-Location
 } else {
     Write-Host "  No git repo in marketplaces. Cloning fresh..." -ForegroundColor Yellow
     Remove-Item -Recurse -Force $MarketplaceDir -ErrorAction SilentlyContinue
+    $env:GIT_SSL_NO_VERIFY = "1"
     git clone $RepoUrl $MarketplaceDir 2>&1 | ForEach-Object { Write-Host "  $_" }
 }
 Write-Host "  Marketplaces updated." -ForegroundColor Green
 
-# Step 3: Copy to cache
+# Step 3: Copy to cache (mirror)
 Write-Host "`n[3/3] Updating cache..." -ForegroundColor Yellow
 Remove-Item -Recurse -Force $CacheDir -ErrorAction SilentlyContinue
-New-Item -ItemType Directory -Force -Path $CacheDir | Out-Null
-Copy-Item -Recurse -Force "$MarketplaceDir\*" "$CacheDir\seek\"
-Write-Host "  Cache updated." -ForegroundColor Green
+New-Item -ItemType Directory -Force -Path "$CacheDir\seek" | Out-Null
+robocopy "$MarketplaceDir" "$CacheDir\seek" /E /NFL /NDL /NJH /NJS 2>&1 | Out-Null
+Write-Host "  Cache mirrored from marketplaces." -ForegroundColor Green
 
 # Verify
 Write-Host "`nVerification:" -ForegroundColor Cyan
